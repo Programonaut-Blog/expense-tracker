@@ -25,12 +25,12 @@ export const authentication: Handle = async ({ event, resolve }) => {
     return response;
 }
 
-const unprotectedPrefix = ['/login'];
+const unprotectedPrefix = ['/login', '/register' ];
 export const authorization: Handle = async ({ event, resolve }) => {
 	// Protect any routes under /authenticated
 	if (!unprotectedPrefix.some((path) => event.url.pathname.startsWith(path)) && event.url.pathname !== '/') {
-		const session = await event.locals.pb.authStore.isValid;
-		if (!session) {
+		const loggedIn = await event.locals.pb.authStore;
+		if (!loggedIn) {
 			throw redirect(303, '/login');
 		}
 	}
