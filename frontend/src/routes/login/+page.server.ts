@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 
 export const load = (async ({locals}) => {    
     if (locals.pb.authStore.model) {
-        return redirect(303, '/dashboard')
+        // return redirect(303, '/dashboard')
     }
 
     return {};
@@ -49,5 +49,22 @@ export const actions = {
         }
 
         throw redirect(303, '/dashboard');
+    },
+    reset: async ({ locals, request }) => {
+        const data = await request.formData();
+        const email = data.get('email');
+        
+        if (!email) {
+            return fail(400, { emailRequired: email === null });
+        }
+
+        try {
+            await locals.pb.collection('users').requestPasswordReset(email.toString());
+        } catch (error) {
+            const errorObj = error as ClientResponseError;
+            return fail(500, {fail: true, message: errorObj.data.message});
+        }
+
+        throw redirect(303, '/login');
     }
 }
