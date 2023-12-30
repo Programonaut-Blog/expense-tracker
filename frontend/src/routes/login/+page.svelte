@@ -27,8 +27,7 @@
     <hr />
     <form method="post">
         {#each data.providers as provider}
-        <input type="hidden" name="provider" value="{provider.name}" />
-        <button class="btn variant-filled w-full mt-2" formaction="?/oauth">{provider.displayName}</button>
+        <button class="btn variant-filled w-full mt-2" formaction="?/{provider.name}">{provider.displayName}</button>
         {/each}
     </form>
 </div>

@@ -3,7 +3,6 @@ import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
 
 export const GET: RequestHandler = async ({locals, url, cookies}) => {
-    console.log('callback');
     const provider = JSON.parse(cookies.get('provider') || '{}');
     console.log(provider);
     
@@ -18,12 +17,10 @@ export const GET: RequestHandler = async ({locals, url, cookies}) => {
             url.searchParams.get('code') || '',
             provider.codeVerifier,
             env.REDIRECT_URL + provider.name
-        )
-        console.log(res);
-        
+        )        
     } catch (error) {
         console.error(error);
-        // return redirect(303, '/login?fail=true');
+        return redirect(303, '/login?fail=true');
     }
 
     throw redirect(303, '/login');

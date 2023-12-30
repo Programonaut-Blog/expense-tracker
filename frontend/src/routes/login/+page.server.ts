@@ -3,7 +3,9 @@ import type { ClientResponseError, LocalAuthStore } from 'pocketbase';
 import type { PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
 
-export const load = (async ({locals, url}) => {       
+export const load = (async ({locals, url}) => {
+    console.log(locals.pb.authStore);
+           
     if (locals.pb.authStore.model) {
         return redirect(303, '/dashboard')
     }
@@ -54,16 +56,9 @@ export const actions = {
 
         throw redirect(303, '/dashboard');
     },
-    oauth: async ({ locals, request, cookies }) => {
-        const data = await request.formData();
-        const providerName = data.get('provider');
-
-        if (!providerName) {
-            return fail(400, { providerNameRequired: true});
-        }
-
-        const provider = (await locals.pb.collection('users').listAuthMethods()).authProviders.find((p: any) => p.name === providerName.toString());
-        cookies.set('provider', JSON.stringify(provider), {httpOnly: true, path: `/auth/callback/${providerName}`});
+    google: async ({ locals, cookies }) => {
+        const provider = (await locals.pb.collection('users').listAuthMethods()).authProviders.find((p: any) => p.name === 'google');
+        cookies.set('provider', JSON.stringify(provider), {httpOnly: true, path: `/auth/callback/google`});
 
         return redirect(303, provider.authUrl + env.REDIRECT_URL + provider.name);
     },
