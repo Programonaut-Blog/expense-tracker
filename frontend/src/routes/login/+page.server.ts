@@ -1,13 +1,17 @@
-import { fail, redirect } from '@sveltejs/kit';
-import type { ClientResponseError } from 'pocketbase';
+import { fail, redirect, type RequestHandler } from '@sveltejs/kit';
+import type { ClientResponseError, LocalAuthStore } from 'pocketbase';
 import type { PageServerLoad } from './$types';
+import { env } from '$env/dynamic/private';
 
-export const load = (async ({locals}) => {    
+export const load = (async ({locals, url}) => {       
     if (locals.pb.authStore.model) {
         return redirect(303, '/dashboard')
     }
 
-    return {};
+    const authMethods = await locals.pb.collection('users').listAuthMethods();
+    const fail = url.searchParams.get('fail') === 'true';
+
+    return {providers: authMethods.authProviders, fail};
 }) satisfies PageServerLoad;
 
 export const actions = {
@@ -49,5 +53,18 @@ export const actions = {
         }
 
         throw redirect(303, '/dashboard');
+    },
+    oauth: async ({ locals, request, cookies }) => {
+        const data = await request.formData();
+        const providerName = data.get('provider');
+
+        if (!providerName) {
+            return fail(400, { providerNameRequired: true});
+        }
+
+        const provider = (await locals.pb.collection('users').listAuthMethods()).authProviders.find((p: any) => p.name === providerName.toString());
+        cookies.set('provider', JSON.stringify(provider), {httpOnly: true, path: `/auth/callback/${providerName}`});
+
+        return redirect(303, provider.authUrl + env.REDIRECT_URL + provider.name);
     }
 }
