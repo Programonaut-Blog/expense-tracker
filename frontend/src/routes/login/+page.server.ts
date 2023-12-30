@@ -7,7 +7,7 @@ export const load = (async ({locals, url}) => {
     console.log(locals.pb.authStore);
            
     if (locals.pb.authStore.model) {
-        return redirect(303, '/dashboard')
+        // return redirect(303, '/dashboard')
     }
 
     const authMethods = await locals.pb.collection('users').listAuthMethods();
@@ -56,11 +56,27 @@ export const actions = {
 
         throw redirect(303, '/dashboard');
     },
+    reset: async ({ locals, request }) => {
+        const data = await request.formData();
+        const email = data.get('email');
+        
+        if (!email) {
+            return fail(400, { emailRequired: email === null });
+        }
+
+        try {
+            await locals.pb.collection('users').requestPasswordReset(email.toString());
+        } catch (error) {
+            const errorObj = error as ClientResponseError;
+            return fail(500, {fail: true, message: errorObj.data.message});
+        }
+        throw redirect(303, '/login');
+    },
     google: async ({ locals, cookies }) => {
         const provider = (await locals.pb.collection('users').listAuthMethods()).authProviders.find((p: any) => p.name === 'google');
         cookies.set('provider', JSON.stringify(provider), {httpOnly: true, path: `/auth/callback/google`});
 
-        return redirect(303, provider.authUrl + env.REDIRECT_URL + provider.name);
+        throw redirect(303, provider.authUrl + env.REDIRECT_URL + provider.name);
     },
     logout: async ({ locals }) => {
         await locals.pb.authStore.clear();

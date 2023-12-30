@@ -21,6 +21,7 @@
             <span>Password</span>
             <input class="input" name="password" title="Password" type="password" placeholder="******" required />
         </label>
+        <button class="block ml-auto hover:underline my-2" formnovalidate formaction="?/reset">Reset Password</button>
         <button class="btn variant-filled w-full mt-4" type="submit">Login</button>
         <button class="btn variant-filled w-full mt-4 mb-2" formaction="?/register">Register</button>
     </form>
