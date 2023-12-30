@@ -22,7 +22,5 @@
         </label>
         <button class="btn variant-filled w-full mt-4" type="submit">Login</button>
         <button class="btn variant-filled w-full mt-4 mb-2" formaction="?/register">Register</button>
-        <hr />
-        <button class="btn variant-filled w-full mt-2" formaction="?/register">Google</button>
     </form>
 </div>

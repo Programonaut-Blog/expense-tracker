@@ -3,7 +3,7 @@ import type { ClientResponseError } from 'pocketbase';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({locals}) => {    
-    if (locals.pb.authStore) {
+    if (locals.pb.authStore.model) {
         return redirect(303, '/dashboard')
     }
 
