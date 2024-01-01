@@ -7,7 +7,7 @@ export const load = (async ({locals, url}) => {
     console.log(locals.pb.authStore);
            
     if (locals.pb.authStore.model) {
-        // return redirect(303, '/dashboard')
+        return redirect(303, '/dashboard')
     }
 
     const authMethods = await locals.pb.collection('users').listAuthMethods();
