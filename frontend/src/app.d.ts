@@ -1,12 +1,9 @@
-import PocketBase from 'pocketbase';
 
-declare global {
-	declare namespace App {
-		interface Locals {
-			pb: Pocketbase;
-		}
-		// interface PageData {}
-		// interface Error {}
-		// interface Platform {}
+declare namespace App {
+	export interface Locals {
+		pb: import('pocketbase').default;
 	}
+	// interface PageData {}
+	// interface Error {}
+	// interface Platform {}
 }

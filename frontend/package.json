@@ -9,7 +9,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typegen": "pocketbase-typegen --out ./src/lib/types/pocketbase.d.ts --db ../backend/pb_data/data.db"
   },
   "devDependencies": {
     "@skeletonlabs/skeleton": "2.6.1",
@@ -21,6 +22,7 @@
     "@tailwindcss/typography": "0.5.10",
     "@types/node": "20.10.5",
     "autoprefixer": "10.4.16",
+    "pocketbase-typegen": "^1.2.1",
     "postcss": "8.4.32",
     "prettier": "^3.1.1",
     "prettier-plugin-svelte": "^3.1.2",

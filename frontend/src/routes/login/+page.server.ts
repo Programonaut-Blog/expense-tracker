@@ -29,8 +29,8 @@ export const actions = {
         data.set('passwordConfirm', password?.toString())        
 		try {
 			await locals.pb.collection('users').create(data);
-			await locals.pb.collection('users').authWithPassword(email, password.toString());
-			await locals.pb.collection('users').requestVerification(email);
+			await locals.pb.collection('users').authWithPassword(email.toString(), password.toString());
+			await locals.pb.collection('users').requestVerification(email.toString());
 		} catch (error) {
 			const errorObj = error as ClientResponseError;
             return fail(500, {fail: true, message: errorObj.data.message});
@@ -76,7 +76,7 @@ export const actions = {
         const provider = (await locals.pb.collection('users').listAuthMethods()).authProviders.find((p: any) => p.name === 'google');
         cookies.set('provider', JSON.stringify(provider), {httpOnly: true, path: `/auth/callback/google`});
 
-        throw redirect(303, provider.authUrl + env.REDIRECT_URL + provider.name);
+        throw redirect(303, provider?.authUrl + env.REDIRECT_URL + provider?.name);
     },
     logout: async ({ locals }) => {
         await locals.pb.authStore.clear();
