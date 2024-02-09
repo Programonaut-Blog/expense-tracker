@@ -1,11 +1,11 @@
-import { fail, redirect, type RequestHandler } from '@sveltejs/kit';
-import type { ClientResponseError, LocalAuthStore } from 'pocketbase';
-import type { PageServerLoad } from './$types';
+import { fail, redirect} from '@sveltejs/kit';
+import type { ClientResponseError } from 'pocketbase';
+import type { Actions, PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
 
 export const load = (async ({locals, url}) => {
     console.log(locals.pb.authStore);
-           
+
     if (locals.pb.authStore.model) {
         return redirect(303, '/dashboard')
     }
@@ -21,12 +21,12 @@ export const actions = {
 		const data = await request.formData();
         const email = data.get('email');
         const password = data.get('password');
-        
+
         if (!email || !password) {
             return fail(400, { emailRequired: email === null, passwordRequired: password === null });
         }
-		
-        data.set('passwordConfirm', password?.toString())        
+
+        data.set('passwordConfirm', password?.toString())
 		try {
 			await locals.pb.collection('users').create(data);
 			await locals.pb.collection('users').authWithPassword(email.toString(), password.toString());
@@ -34,15 +34,15 @@ export const actions = {
 		} catch (error) {
 			const errorObj = error as ClientResponseError;
             return fail(500, {fail: true, message: errorObj.data.message});
-        } 
-		
+        }
+
 		throw redirect(303, '/dashboard');
 	},
     login: async ({ locals, request }) => {
         const data = await request.formData();
         const email = data.get('email');
         const password = data.get('password');
-        
+
         if (!email || !password) {
             return fail(400, { emailRequired: email === null, passwordRequired: password === null });
         }
@@ -59,7 +59,7 @@ export const actions = {
     reset: async ({ locals, request }) => {
         const data = await request.formData();
         const email = data.get('email');
-        
+
         if (!email) {
             return fail(400, { emailRequired: email === null });
         }
@@ -82,4 +82,4 @@ export const actions = {
         await locals.pb.authStore.clear();
         throw redirect(303, '/login');
     }
-}
+} satisfies Actions;

@@ -1,6 +1,6 @@
-import type { CategoriesRecord, CategoriesResponse, ExpensesRecord, ExpensesResponse } from '$lib/types/pocketbase';
+import type { CategoriesResponse, ExpensesRecord, ExpensesResponse } from '$lib/types/pocketbase';
 import { fail } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ locals }) => {
     const categories = await locals.pb.collection('categories').getFullList<CategoriesResponse>();
@@ -61,8 +61,6 @@ export const actions = {
         return { success: true, update: true }
     },
     delete: async ({locals, request}) => {
-        console.log("Delete");
-        
         const data = await request.formData();
 
         const hasId = data.has('id');
@@ -79,4 +77,4 @@ export const actions = {
 
         return { success: true, update: true }
     }
-}
+} satisfies Actions;
