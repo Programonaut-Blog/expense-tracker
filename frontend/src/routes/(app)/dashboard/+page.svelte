@@ -2,6 +2,12 @@
 	import { getModalStore, getToastStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { onDestroy, onMount } from 'svelte';
+    import PocketBase from 'pocketbase';
+	import { env } from '$env/dynamic/public';
+	import type { CategoriesResponse, ExpensesResponse } from '$lib/types/pocketbase';
+	import PieChart from '$lib/components/PieChart.svelte';
+	import type { ChartData } from 'chart.js';
 
 	export let data: PageData;
     const modalStore = getModalStore();
@@ -46,10 +52,87 @@
     }
 
     let editExpenses: boolean = false;
+
+    let pb: PocketBase;
+    onMount(async () => {
+        // use client side pocketbase for subscriptions
+        pb = new PocketBase(env.PUBLIC_PB_URL);
+        pb.authStore?.loadFromCookie(document.cookie || '')
+        
+        pb.collection('expenses').subscribe<ExpensesResponse<{ category: CategoriesResponse; }>>('*', function (e) {
+            switch (e.action) {
+                case 'create':
+                    let icon = e.record.expand?.category?.icon
+                    if (icon) {
+                        const url = pb.files.getUrl(e.record.expand?.category!, icon, {'thumb': '100x100'});
+                        e.record.expand!.category!.icon = url;
+                    }
+                    data.expenses = [...data.expenses, e.record];
+                    break;
+                case 'update':
+                    data.expenses = data.expenses.map((expense) => {
+                        if (expense.id === e.record.id) {
+                            let icon = e.record.expand?.category?.icon
+                            if (icon) {
+                                const url = pb.files.getUrl(e.record.expand?.category!, icon, {'thumb': '100x100'});
+                                e.record.expand!.category!.icon = url;
+                            }
+                            
+                            return e.record;
+                        }
+                        return expense;
+                    });
+                    break;
+                case 'delete':
+                    data.expenses = data.expenses.filter((expense) => expense.id !== e.record.id);
+                    break;
+            }
+        }, { expand: "category" });
+    });
+
+    onDestroy(()=>{
+        // destroy client when component is destroyed
+        pb?.authStore?.clear()
+    })
+
+    $: formattedExpenses = ((): ChartData<'pie', number[], unknown> => {
+        // labels
+        let labels = [...(new Set(data.expenses.map((expense) => expense.expand ? expense.expand.category.name : "Other")))];
+        labels = labels.map((label) => label.charAt(0).toUpperCase() + label.slice(1));
+
+        // data to label
+        let dataToLabel = new Array(labels.length).fill(0);
+        data.expenses.forEach((expense) => {
+            let label = expense.expand ? expense.expand.category.name : "Other";
+            let index = labels.indexOf(label.charAt(0).toUpperCase() + label.slice(1));
+            dataToLabel[index] += expense.expense;
+        });
+
+        // color to label
+        let backgroundColor = new Array(labels.length).fill('');
+        dataToLabel.forEach((_, index) => {
+            backgroundColor[index] = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
+        });
+
+        return {
+            labels,
+            datasets: [
+                {
+                    label: 'Expenses in €',
+                    data: dataToLabel,
+                    backgroundColor
+                },
+            ]
+        }
+    })()
 </script>
 
 <div class="grid grid-cols-5 h-full max-h-full">
-	<div class="col-span-2"></div>
+	<div class="col-span-2">
+        <div class="w-full h-full p-16">
+            <PieChart data={formattedExpenses} />
+        </div>
+    </div>
 	<div class="col-span-3 border-l border-surface-900-50-token p-6 flex flex-col gap-8 h-full">
 		<ul class="list w-full p-2 overflow-y-auto flex-[1_1_0]">
 			{#each data.expenses as expense}

@@ -24,7 +24,7 @@ export const actions = {
         data.append("currency", "€")
 
         const hasLabel = data.has('label');
-        const hasAmount = data.has('amount');
+        const hasAmount = data.has('expense');
         const hasCategory = data.has('category');
         if (!hasLabel || !hasAmount || !hasCategory) {
             return fail(400, {hasLabel, hasAmount, hasCategory})
@@ -45,7 +45,7 @@ export const actions = {
 
         const hasId = data.has('id');
         const hasLabel = data.has('label');
-        const hasAmount = data.has('amount');
+        const hasAmount = data.has('expense');
         const hasCategory = data.has('category');
         if (!hasId || !hasLabel || !hasAmount || !hasCategory) {
             return fail(400, {hasId, hasLabel, hasAmount, hasCategory})

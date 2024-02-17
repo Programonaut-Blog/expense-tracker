@@ -52,7 +52,7 @@
 			</label>
 			<label class="label">
 				<span>Amount:</span>
-				<input class="input" name="amount" type="number" bind:value={formData.amount} placeholder="Enter amount..." required />
+				<input class="input" name="expense" type="number" bind:value={formData.amount} placeholder="Enter amount..." required />
 			</label>
 			<label class="label">
 				<span>Category:</span>
